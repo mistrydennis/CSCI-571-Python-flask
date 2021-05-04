@@ -1,0 +1,903 @@
+<html>
+    <head>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+        <style>
+           
+
+            .stockdiv {
+                background-color: #e8e8e8;
+                border-radius: 10px;
+                position: relative;
+                padding: 20px;  /* It is changing the sizeof the box*/
+                
+                height: 30%;  
+                margin-left:15%;
+                margin-right: 15%;
+
+            }
+
+            #p_for_stock{
+                text-align: center;
+                font-size: 30;
+                position: relative;
+
+            }
+            .search_form {
+                padding-bottom: 30px;
+                align-self: center;
+                margin-left:35%;
+            }
+            .button_search {
+                background-color: #f6f6f6;
+                border: none;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                margin-right: 40px;
+                margin-top: 15px;
+                padding-left: 30px;
+                padding-right: 30px;
+                border-radius: 5px;
+                margin-left: 10%;
+                text-align: center;
+                
+            }
+            .button_search:hover {
+                background-color: darkgray;
+            }
+
+            .button_clear {
+                background-color: #f6f6f6;
+                border: none;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                margin-right: 40px;
+                margin-top: 15px;
+                padding-left: 30px;
+                padding-right: 30px;
+                border-radius: 5px;
+                text-align: center;
+            }
+
+            .button_clear:hover {
+                background-color: darkgray;
+            }
+
+            #container {
+                 width:70%; height:10%; margin-left: 15%; display:none;
+
+            }
+
+            #error {
+                width:70%; height:10%; margin-left: 37%; margin-top:5%; display: none;
+            }
+
+            #div_container{
+                 background:#e8e8e8;
+                 display: flex; 
+                 height:70%; 
+                 align-items: center;
+            }
+            
+            .tab_div {
+             
+                width: 20%;
+                height:100%;
+                text-align: center;
+                font-size: 15;
+                border: none;
+                background: #e8e8e8;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                
+            }
+
+            #sub_container1 {
+                margin-top:2%; 
+                
+            }
+
+            table{
+                table-layout: fixed;
+                width: 100%;
+                border-collapse: collapse;
+                
+            }
+
+            .tdleft {
+                width:30%;
+                text-align:left;
+                font-weight: bold;
+                font-size: 15;
+                background: lightgray;
+                border: 1px solid darkgray;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .tdright {
+                text-align:center;
+                font-size: 20px;
+                background:#e8e8e8;
+                border: 1px solid darkgrey;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #complete_stock {
+                width: 100%;
+            }
+
+            #stock_summary {
+                width: 100%;
+                display: none; /*Initially none so that it is not displayed*/
+            }
+
+            #chart_summary {
+                display:none;
+            }
+
+            #latestnews {
+                display:none;
+
+            }
+
+
+            .card_Image {
+                width: 100px;
+                height: 100px;
+                padding-left: 15px;
+                padding-top: 12px;
+                padding-bottom: 10px;
+                object-fit: initial;
+            }
+
+            .card_div {
+                width: 100%;
+                height: 130px;
+                border-radius: 5px;
+                background:#e8e8e8;
+                display: flex;
+                margin-top: 20px;
+            }
+
+            .inner_card {
+                padding-left: 20px;
+                padding-top: 12px;
+            }
+           
+                
+            .tab_div:hover{
+                background-color: lightgray;
+                cursor: pointer;
+            }
+
+            .tab_div.selected {
+                background-color: lightgray;
+            }
+
+            .common_font {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+
+           
+        </style>
+
+        <script type="text/javascript">
+
+            var articles = [];
+            var selected_option = "company_outlook";
+            var arr1 = new Array();
+            var arr2 = new Array();
+            var flag = false;
+            // onclick :CLEAR BUTTON
+            function clearPage(){
+                
+		        document.getElementsByClassName("search_form")[0].reset();
+                selected_option="company_outlook";
+                document.getElementById("latestnews").innerHTML="";
+                
+                document.getElementById("container").style.display = "none";
+               
+                document.getElementById("error").style.display = "none";
+                articles=[];
+                arr1 = new Array();
+                arr2 = new Array();
+                // console.log(articles);
+                
+                
+            }
+
+            //onclick: SEARCH BUTTON
+            function onLoadBelow(event) {
+                event.preventDefault();
+
+                selected_option = "company_outlook";
+                articles=[];
+                arr1 = new Array();
+                arr2 = new Array();
+              
+                onSelectColorChange();
+                show_company_data();
+                
+
+                show_stock_summary();
+                show_high_chart();
+                showLatestNews();
+                // document.getElementById("error").style.display = "none";
+                // console.log("After func:",flag);
+                // if(flag == true)
+                // {   
+                    
+                // }
+                    
+                // else if(flag == false)
+                // {
+                    
+                //     document.getElementById("error").style.display="none";
+                //     document.getElementById("container").style.display = "block";
+                    
+                //     document.getElementById("complete_stock").style.display = "block";
+                //     document.getElementById("stock_summary").style.display = "none";
+                //     document.getElementById("chart_summary").style.display = "none";
+                //     document.getElementById("latestnews").style.display = "none";
+
+                //     //Calling all the APIs together as it will handle the edge cases properly.
+                //     show_stock_summary();
+                //     show_high_chart();
+                //     showLatestNews();
+
+                // }
+                
+                
+            }
+
+          
+
+            
+// -----------------------------COMPANY_OUTLOOK TAB----------------------------------------------------
+
+            function onCompanyOutlook(event) {
+                // show_company_data();
+                event.preventDefault();
+                document.getElementById("complete_stock").style.display = "block";
+                document.getElementById("stock_summary").style.display = "none";
+                document.getElementById("chart_summary").style.display = "none";
+                document.getElementById("latestnews").style.display = "none";
+                onSelectColorChange();
+                
+            }
+
+            
+
+            function show_company_data()
+            {
+                
+                // flag = false;
+                xmlhttp = new XMLHttpRequest();
+                keyword = document.search_form.searchbox.value;
+                
+                url = "/company_outlook?keyword="+keyword;
+               
+                xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                // fetch(url)
+                // .then((resp) => resp.json())
+                // .then(
+                //     result=>{
+                    // var company_data = result;
+                    // console.log(company_data);
+                    var company_data = JSON.parse(xmlhttp.responseText);
+                    
+                    for(x in company_data)
+                        if(x=='detail')
+                        {
+                            console.log("I am doing it right here");
+                            document.getElementById("container").style.display="none";
+                            document.getElementById("error").style.display="block";
+                        }
+                            
+                    
+                        else
+                        {
+                            document.getElementById("error").style.display="none";
+                            document.getElementById("container").style.display = "block";
+                            document.getElementById("complete_stock").style.display = "block";
+                            document.getElementById("stock_summary").style.display = "none";
+                            document.getElementById("chart_summary").style.display = "none";
+                            document.getElementById("latestnews").style.display = "none";
+
+                            //Calling all the APIs together as it will handle the edge cases properly.
+                            
+
+
+                            if(company_data.description.length < 387){
+                                description = company_data.description;
+                            }
+                            else{
+                                description = company_data.description.slice(0,387);
+                                ellipsis = 386;
+                                while(description.charAt(ellipsis)!=" "){
+                                    ellipsis --;
+                                }
+                                description = description.slice(0, ellipsis);
+                                description += " ...";
+                            }
+
+                            document.getElementById('company').innerHTML=company_data['name'];
+                            document.getElementById('ticker').innerHTML = company_data['ticker'];
+                            document.getElementById('exchange').innerHTML=company_data['exchangeCode'];
+                            document.getElementById('start').innerHTML = company_data['startDate'];
+                            document.getElementById('description').innerHTML = description;
+                        }
+                    //Code relevant to fetch API call.
+                    // })
+                    // .catch(error=>{
+                    //     console.log(error);
+                    // });
+                    
+
+                }
+                    
+            };
+
+            
+                
+                xmlhttp.open("GET",url,true);
+                xmlhttp.send("");
+                // console.log("Exit of company data",flag);
+                
+                
+            }
+
+            
+            
+//The company_outllok tab looks fine--after async call.
+
+
+// --------------------------SHOW SUMMARY TAB-----------------------------------------------
+            function getSummary() {
+                
+               
+                document.getElementById("complete_stock").style.display = "none";
+                document.getElementById("stock_summary").style.display="block";
+                document.getElementById("chart_summary").style.display = "none";
+                document.getElementById("latestnews").style.display = "none";                
+            }
+
+
+            function show_stock_summary()
+            {
+                var xhttp = new XMLHttpRequest();
+                keyword = document.search_form.searchbox.value;
+                
+                url1 = "/stock_summary?keyword="+keyword;
+                // console.log(url1);
+                //Sync call
+                // xmlhttp.open("GET",url1,false);
+                // xmlhttp.send();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        stocksummary = JSON.parse(xhttp.responseText);
+                        // console.log("This is stock summary",stocksummary);
+                    for(x in stocksummary)
+                    {
+
+                        if(x!='detail' || x!== undefined)
+                        {
+
+                        
+                //Sync call
+                // if(xmlhttp.status==200 && stocksummary)
+                // {
+
+                    var change = (stocksummary['last'] - stocksummary['prevClose']).toFixed(2);
+                    var change_percent = ((change/(stocksummary['prevClose']))*100).toFixed(2);
+                    var increase = '<img src="https://csci571.com/hw/hw6/images/GreenArrowUp.jpg" style="height: 15px; opacity: 0.6;"/>';
+                    var decrease = '<img src="https://csci571.com/hw/hw6/images/RedArrowDown.jpg" style="height: 15px; opacity: 0.6;"/>';
+                    if(stocksummary['ticker']!=null)
+                        document.getElementById('stock').innerHTML=stocksummary['ticker'];
+                    if(stocksummary['timestamp']!=null)
+                        document.getElementById('trading').innerHTML=stocksummary['timestamp'].toString().slice(0,10);
+                    if(stocksummary['open']!=null)
+                        document.getElementById('Opening').innerHTML=stocksummary['open'];
+                    if(stocksummary['prevClose']!=null)
+                        document.getElementById('closing').innerHTML=stocksummary['prevClose'];
+                    if(stocksummary['high']!=null)
+                        document.getElementById('high').innerHTML=stocksummary['high'];
+                    if(stocksummary['low']!=null)
+                        document.getElementById('low').innerHTML=stocksummary['low'];
+                    if(stocksummary['last']!=null)
+                        document.getElementById('last').innerHTML = stocksummary['last'];
+                    if(change>0)
+                        document.getElementById('change').innerHTML= change+" "+increase;
+                    else if(change<0)
+                        document.getElementById('change').innerHTML= change+" "+decrease;
+                    else
+                        document.getElementById('change').innerHTML= change;
+                    if(change_percent>0)
+                        document.getElementById('percent').innerHTML=change_percent+"% "+increase;
+                    else if(change_percent<0)
+                        document.getElementById('percent').innerHTML=change_percent+"% "+decrease;
+                    else
+                        document.getElementById('percent').innerHTML= 0+"%";
+                    document.getElementById('number').innerHTML = stocksummary['volume'];
+                        }
+                    }
+                }
+                
+            };
+
+            xhttp.open("GET",url1,true);
+            xhttp.send("");
+            }
+//-----------------------HIGH CHARTS TAB----------------------------------------------
+            function show_high_chart()
+            {
+                xhttps = new XMLHttpRequest();
+                keyword = document.search_form.searchbox.value;
+                // console.log(keyword);
+                url2 = "/chart_summary?keyword="+keyword;
+                // console.log(url2);
+               
+                xhttps.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+
+
+
+                        chart_summary = JSON.parse(xhttps.responseText);
+                        console.log(chart_summary)
+                        var check = false;
+                        for(x in chart_summary['chart_data'])
+                            if(x=='detail' || chart_summary['chart_data'].length==0)
+                            {
+                                console.log(x);
+                                document.getElementById("chart_container").innerHTML="<div><h3>No chart data found</h3></div>";
+                            
+                            }
+                            else
+                            {
+
+                        // Sync call
+                        // Creating the array as required by the high chart API.
+                        // if(xmlhttp.status==200 && !check)
+                        // {
+                                var len = Object.keys(chart_summary['chart_data']).length;
+                                console.log("I am getting into high_Chart");
+                                //TODO: length check while taking an API call 
+                                arr1=new Array(len);
+                                for(var i=0;i<len;i++)
+                                {
+                                    arr1[i] = new Array(2);
+
+                                    // Check if the date is not defined.
+                                    // console.log((chart_summary['chart_data'][i].date).toString().substring(0,10));
+                                    var x1 = new Date(chart_summary['chart_data'][i].date);
+                                    var utcDate =  Date.UTC(x1.getFullYear(),x1.getMonth(),x1.getDate());
+                                    // console.log(utcDate);
+                                    var y1 = chart_summary['chart_data'][i].close;
+                                    // console.log(x1,y1);
+                                    arr1[i][0] = utcDate;
+                                    arr1[i][1] = y1;
+                                    // console.log(arr1);
+                                }
+
+                                arr2=new Array(len);
+                                for(var i=0;i<len;i++)
+                                {
+                                    arr2[i] = new Array(2);
+                                    var x1 = new Date(chart_summary['chart_data'][i].date);
+                                    
+
+                                    var y1 = chart_summary['chart_data'][i].volume;
+                                    // console.log(x1,y1);
+                                    // var utcDate = Date.UTC(year,month,year);
+                                    var utcDate = Date.UTC(x1.getFullYear(),x1.getMonth(),x1.getDate());
+                                    // console.log(utcDate);
+                                    arr2[i][0] = utcDate;
+                                    arr2[i][1] = y1;
+                                    
+                                }
+                            } //else ends here
+                }
+                else
+                {
+                    document.getElementById("chart_container").innerHTML="<div><h3>Error,Occurred in getting Data</h3></div>";
+                }
+                };
+                
+                xhttps.open("GET",url2,true);
+                xhttps.send();
+                
+                
+                
+            }
+
+            function getCharts() {
+                // show_high_chart();
+                // selected_option = "charts";
+                
+                document.getElementById("complete_stock").style.display = "none";
+                document.getElementById("stock_summary").style.display="none";
+                document.getElementById("chart_summary").style.display = "block";
+                document.getElementById("latestnews").style.display = "none";
+                // document.getElementById("chart_container").style.display = "block";
+                var ticker = document.search_form.searchbox.value.toUpperCase();
+                var link = "<a style='text-decoration:underline;' href='https://api.tiingo.com/' target='_blank' rel='noopener noreferrer'>Source:Tiingo </a>";
+                // console.log("This is arr1"+arr1);
+                //JS logic to fetch today's date
+                var today = new Date(); 
+                var dd = today.getDate(); 
+                var mm = today.getMonth()+1; 
+                var yyyy = today.getFullYear(); 
+                if(dd<10){dd='0'+dd} 
+                if(mm<10){mm='0'+mm} 
+                var today = yyyy+'-'+mm+'-'+dd;
+                // var parentdiv = document.getElementById("chart_summary");
+                // var child = document.createElement("chart_container");
+                // if(document.getElementById('chart_container')==null)
+                //     parentdiv.appendChild(child);
+                // console.log("This is Parent DIV",parentdiv);
+                // console.log("This is Child DIV",child);
+                Highcharts.setOptions({
+                        colors: ['#7cb5ec', '#616365']
+                });
+                        // create the chart
+                console.log("To check for proper rendering",document.getElementById('chart_container'));
+                Highcharts.stockChart('chart_container',{
+
+                    title: {
+                        text: "Stock Price " + ticker+" "+today
+                    },
+
+                    subtitle: {
+                        text:link,
+                        useHTML: true
+                    },
+
+                    xAxis: {
+                        gapGridLineWidth: 0,
+                        title:{
+                            // text:'Date'
+                        },
+                        reserveSpace: false
+                        // minRange:7
+                    },
+
+                    yAxis: [{ // Primary yAxis
+                        labels: {
+                            format: '{value}',
+                            style: {
+                                color: Highcharts.getOptions().colors[1],
+                                align:'left'
+                            }
+                            
+                        },
+                        title: {
+                            text: 'Stock Price',
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            }
+                        },
+                        opposite:false
+                        
+                    }, { // Secondary yAxis
+                        title: {
+                            text: 'Volume',
+                            style: {
+                                color: Highcharts.getOptions().colors[1],
+                                align:'right'
+                            }
+                        },
+                        labels: {
+                            
+                            style: {
+                                color: Highcharts.getOptions().colors[1]
+                            },
+                            formatter:function()
+                            {
+                                if(this.value==0)
+                                    return this.value;
+                                else
+                                    return Highcharts.numberFormat(this.value/1000,0)+ "k";
+                            }
+                        },
+                        opposite:true
+                        
+                    }],
+
+                    rangeSelector: {
+                        buttons: [{
+                            type: 'day',
+                            count: 7,
+                            text: '7d'
+                        }, {
+                            type: 'day',
+                            count: 15,
+                            text: '15d'
+                        }, {
+                            type: 'month',
+                            count: 1,
+                            text: '1m'
+                        },{
+                            type: 'month',
+                            count: 3,
+                            text: '3m'
+                        },{
+                            type: 'month',
+                            count: 6,
+                            text: '6m'
+                        }],
+                        selected: 5,
+                        inputEnabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            pointWidth: 2,
+                            pointPlacement: 'on'
+                        }
+                    },
+                    series: [{
+                        name: ticker,
+                        type: 'area',
+                        data: arr1,
+                        gapSize: 5,
+                        tooltip: {
+                            valueDecimals: 2
+                        },
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        
+                        
+                    },
+                    
+                    
+                    {
+                        name: ticker +" Volume",
+                        type: 'column',
+                        data: arr2,
+                        
+                        gapSize: 5,
+                        tooltip: {
+                            valueDecimals: 2
+                        },
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[1]],
+                                [1, Highcharts.color(Highcharts.getOptions().colors[1]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        
+                        yAxis:1,
+                        
+                    }],
+                    
+                });
+                    
+        }
+
+// ------------------------ NEWS TAB-----------------------------------------------
+            function showLatestNews()
+            {
+                xhr = new XMLHttpRequest();
+                keyword = document.search_form.searchbox.value;
+                
+                url3 = "/news?keyword="+keyword;
+               
+               
+                
+                
+                xhr.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) { 
+                        latest_news = JSON.parse(xhr.responseText);
+                        console.log("This is latest news",latest_news);
+                        var container = document.getElementById("latestnews");
+                        container.innerHTML="";
+                        console.log("This is after articles is cleared",articles);
+                        articles = latest_news['articles'];
+                        console.log(articles);
+                        // console.log(latest_news);
+                    
+                            // var unique_news= new Set();
+                            // for (var i = 0,count=0; i < articles.length; i++) {
+                            // if(!unique_news.has(articles[i]))
+                            //     unique_news.add(articles[i]);
+                            // }
+                            // if(xmlhttp.status==200)
+                            // {
+                                for (var i = 0,count=0; i < articles.length; i++) {
+                            
+                                if(articles[i].urlToImage!=null && articles[i].urlToImage.length!=0 && articles[i].title!=null && articles[i].title.length!=0 && articles[i].publishedAt!=null &&
+                                articles[i].publishedAt.length!=0 && articles[i].url!=null && articles[i].url.length!=0 && container)
+                                {
+                                    container.innerHTML += " <div class='card_div' id='news_card'><img class='card_Image' src="+articles[i].urlToImage
+                                    +"></img><div class='inner_card'>\
+                                                    <div id='card_title'>"+articles[i].title+"</div>\
+                                                    <div id='card_date'>Published date:  "+new Date(articles[i].publishedAt).toLocaleDateString()+"</div>\
+                                                    <div id='card_link'><a href='"+articles[i].url+"'>See Original Post</a></div>\
+                                                </div> \
+                                                </div>";
+                                    count++;
+                                    if(count==5)break;
+                                }
+                                }
+                            // } 
+                            if(!articles)
+                            {
+                                container.innerHTML = "<div>No news found</div>"
+                            }
+                    }
+                };
+
+                    xhr.open("GET",url3,true);
+                    xhr.send();
+            }
+
+            function getLatestNews()
+            {
+                // var news_contain= document.getElementById("latestnews");
+                // if(!news_contain)
+                //     news_contain.innerHTML="No news found";
+                // else
+                    // news_contain.innerHTML="";
+                // showLatestNews();
+                // document.getElementById("latestnews").innerHTML="";
+                document.getElementById("complete_stock").style.display = "none";
+                document.getElementById("stock_summary").style.display="none";
+                document.getElementById("chart_summary").style.display = "none";
+                document.getElementById("latestnews").style.display = "block";
+            }
+
+            
+            function onSelectColorChange()
+            {
+                var nav_div = document.getElementById("div_container").children;
+                if(nav_div && nav_div.length>0)
+                {
+                    for(var i=0;i<nav_div.length;i++)
+                    {
+                        var temp_div = nav_div[i];
+                        if(temp_div.id == selected_option)
+                            temp_div.classList.add('selected');
+                        else
+                            temp_div.classList.remove('selected');
+
+                    }
+                }
+            }
+            
+            function navigator(key,event)
+            {
+               selected_option = key;
+               onSelectColorChange();
+               switch(key)
+               {
+                   case 'company_outlook':
+                        onCompanyOutlook(event);
+                        break;
+                   case 'stocksummary':
+                        getSummary();
+                        break;
+
+                   case 'charts':
+                        getCharts();
+                        break;
+                   case 'latest':
+                        getLatestNews();
+                        break;
+                   case 'default': 
+                    break;
+               }   
+            }
+
+        </script>
+    </head>
+    <body style="background-color: #6060a9;">
+       <div class="maindiv">
+           <br><br><br><br>
+            <div class="stockdiv">
+                <p id="p_for_stock"><b class="common_font">Stock Search</b></p>
+                <form name="search_form" class="search_form" onsubmit="onLoadBelow(event)" >
+                    <label class="common_font" for="searchbox">Enter Stock Ticker Symbol<text style="color:red; padding-right: 20px;">*  </text></label>  <input type="text" name="searchbox" id="searchbox" required>
+                    <br><br>
+                    <input class="button_search common_font" type="Submit" value="Search" >
+					<input class="button_clear common_font" type="button" value="Clear" onclick="clearPage();">
+                </form>
+            </div>
+            <div>
+                <hr style="width:70%; margin-top:15px; margin-bottom: 15px; color:lightgray;">
+            </div>
+            <div id="error">
+                <h3 class="common_font">Error : No record has been found,please enter a valid symbol. </h3>
+            </div>
+            <!-- This has to be rendered on click of search or to be cleared -->
+            <!-- You can't use onload on a div -->
+            <div id="container" >
+                <div id="div_container" class="div_cont">
+                    <div class="tab_div common_font" onclick='navigator("company_outlook",event)' id="company_outlook">
+                        Company Outlook
+                    </div>
+                    <div class="tab_div common_font" onclick='navigator("stocksummary")' id="stocksummary">
+                        Stock Summary
+                    </div>
+                    <div class="tab_div common_font" onclick='navigator("charts")' id="charts">
+                        Charts
+                    </div>
+                    <div class="tab_div common_font" onclick='navigator("latest")' id="latest">
+                        Latest News
+                    </div>
+                </div>
+                
+
+                <br>
+                
+                <div id="sub_container1"> 
+                    <div id="complete_stock">
+                        <table>
+                            <tr><td class="tdleft">Company Name</td><td class="tdright" id="company"></td></tr>
+                            <tr><td class="tdleft">Stock Ticker Symbol</td><td class="tdright" id="ticker"></td></tr>
+                            <tr><td class="tdleft">Stock Exchange Code</td><td class="tdright" id="exchange"></td></tr>
+                            <tr><td class="tdleft">Company Start Date</td><td class="tdright" id="start"></td></tr>
+                            <tr><td class="tdleft" >Description</td><td class="tdright" id="description"></td></tr>
+                           
+                        </table>
+                    </div>
+                    <div id="stock_summary">
+                        <table>
+                            <tr><td class="tdleft">Stock Ticker Symbol</td><td class="tdright" id="stock"></td></tr>
+                            <tr><td class="tdleft">Trading Day</td><td class="tdright" id="trading"></td></tr>
+                            <tr><td class="tdleft">Previous Closing Price</td><td class="tdright" id="closing"></td></tr>
+                            <tr><td class="tdleft">Opening Price</td><td class="tdright" id="Opening"></td></tr>
+                            <tr><td class="tdleft" >High Price</td><td class="tdright" id="high"></td></tr>
+                            <tr><td class="tdleft" >Low Price</td><td class="tdright" id="low"></td></tr>
+                            <tr><td class="tdleft" >Last Price</td><td class="tdright" id="last"></td></tr>
+                            <tr><td class="tdleft">Change</td><td class="tdright" id="change"></td></tr>
+                            <tr><td class="tdleft">Change Percent</td><td class="tdright" id="percent"></td></tr>
+                            <tr><td class="tdleft">Number of Shares Traded</td><td class="tdright" id="number"></td></tr>
+                        </table> 
+                    </div>
+                    <div id="chart_summary">
+                        <div id="chart_container" style="height: 400px; min-width: 310px"></div>
+                    </div>
+                    <div id="latestnews">
+                            <!--  <div class="card_div" id="news_card">
+                                <img class="card_Image" src="https://cdn.cnn.com/cnnnext/dam/assets/200813143334-apple-tim-cook-0910-file-super-tease.jpg"></img>
+                                <div class="inner_card">
+                                    <div id="card_title">Apple is now worth $2 trillion</div>
+                                    <div id="card_date">Published date</div>
+                                    <div id="card_link"><a href="www.google.com">See Original Post</a></div>
+                                </div> -->
+                                
+                    </div>
+                    
+                </div>
+               
+            </div>
+            
+       </div>
+
+       
+    </body>
+    
+</html>
+
+
+
+    
